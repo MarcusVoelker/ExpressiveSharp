@@ -16,6 +16,7 @@ namespace ExpressiveSharp.Parser
             ConstantPostDot,
             Dot,
             Identifier,
+            Operator,
         }
 
         private static Token Constant(string code)
@@ -34,6 +35,20 @@ namespace ExpressiveSharp.Parser
             {
                 case ".":
                     return new OperatorToken(OperatorToken.OperatorType.Dot);
+                case "(":
+                    return new OperatorToken(OperatorToken.OperatorType.LParen);
+                case ")":
+                    return new OperatorToken(OperatorToken.OperatorType.RParen);
+                case "+":
+                    return new OperatorToken(OperatorToken.OperatorType.Plus);
+                case "-":
+                    return new OperatorToken(OperatorToken.OperatorType.Minus);
+                case "*":
+                    return new OperatorToken(OperatorToken.OperatorType.Star);
+                case "/":
+                    return new OperatorToken(OperatorToken.OperatorType.Slash);
+                case "%":
+                    return new OperatorToken(OperatorToken.OperatorType.Percent);
             }
             throw new InvalidOperationException("Unknown operator " + code);
         }
@@ -65,6 +80,11 @@ namespace ExpressiveSharp.Parser
                         case State.Identifier:
                             accumulator += c;
                             break;
+                        case State.Operator:
+                            state = State.Constant;
+                            yield return Operator(accumulator);
+                            accumulator = "" + c;
+                            break;
                     }
                     continue;
                 }
@@ -92,6 +112,11 @@ namespace ExpressiveSharp.Parser
                             state = State.Dot;
                             accumulator = ".";
                             break;
+                        case State.Operator:
+                            state = State.Dot;
+                            yield return Operator(accumulator);
+                            accumulator = ".";
+                            break;
                     }
                     continue;
                 }
@@ -117,6 +142,11 @@ namespace ExpressiveSharp.Parser
                         case State.Identifier:
                             accumulator += c;
                             break;
+                        case State.Operator:
+                            state = State.Identifier;
+                            yield return Operator(accumulator);
+                            accumulator = "" + c;
+                            break;
                     }
                     continue;
                 }
@@ -135,9 +165,40 @@ namespace ExpressiveSharp.Parser
                         case State.Identifier:
                             yield return Identifier(accumulator);
                             break;
+                        case State.Operator:
+                            yield return Operator(accumulator);
+                            break;
                     }
                     state = State.NextToken;
                     continue;
+                }
+                //Operator
+                switch (state)
+                {
+                    case State.NextToken:
+                        accumulator = "" + c;
+                        state = State.Operator;
+                        break;
+                    case State.Constant:
+                    case State.ConstantPostDot:
+                        yield return Constant(accumulator);
+                        accumulator = "" + c;
+                        state = State.Operator;
+                        break;
+                    case State.Dot:
+                        yield return Operator(accumulator);
+                        accumulator = "" + c;
+                        state = State.Operator;
+                        break;
+                    case State.Identifier:
+                        yield return Identifier(accumulator);
+                        accumulator = "" + c;
+                        state = State.Operator;
+                        break;
+                    case State.Operator:
+                        yield return Operator(accumulator);
+                        accumulator = "" + c;
+                        break;
                 }
             } 
             switch (state)
@@ -152,6 +213,9 @@ namespace ExpressiveSharp.Parser
                     throw new InvalidOperationException("Code ends on dot");
                 case State.Identifier:
                     yield return Identifier(accumulator);
+                    break;
+                case State.Operator:
+                    yield return Operator(accumulator);
                     break;
             }
         }

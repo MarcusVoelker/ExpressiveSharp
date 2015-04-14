@@ -113,6 +113,13 @@ namespace ExpressiveSharp.Parser
         public enum OperatorType
         {
             Dot,
+            LParen,
+            RParen,
+            Plus,
+            Minus,
+            Star,
+            Slash,
+            Percent,
         }
         public OperatorToken(OperatorType type)
         {

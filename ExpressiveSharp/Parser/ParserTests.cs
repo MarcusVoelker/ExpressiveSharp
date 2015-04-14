@@ -10,7 +10,7 @@ namespace ExpressiveSharp.Parser
         [Test]
         public void TokenizerTest()
         {
-            var tokens = Tokenizer.Tokenize("1.2.abc12.12b");
+            var tokens = Tokenizer.Tokenize("1.2.abc12.12b+-.2.b*");
             Assert.True(tokens.SequenceEqual(new Token[]
             {
                 new ConstantToken(1.2f),
@@ -18,6 +18,12 @@ namespace ExpressiveSharp.Parser
                 new IdentifierToken("abc12"),
                 new ConstantToken(.12f),
                 new IdentifierToken("b"),
+                new OperatorToken(OperatorToken.OperatorType.Plus),
+                new OperatorToken(OperatorToken.OperatorType.Minus),
+                new ConstantToken(.2f),
+                new OperatorToken(OperatorToken.OperatorType.Dot),
+                new IdentifierToken("b"),
+                new OperatorToken(OperatorToken.OperatorType.Star),
             }));
         }
     }
