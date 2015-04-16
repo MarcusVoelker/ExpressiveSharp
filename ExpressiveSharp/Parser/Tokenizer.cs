@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpressiveSharp.Parser
 {
-    static class Tokenizer
+    internal static class Tokenizer
     {
         private enum State
         {
             NextToken,
             Constant,
+            ConstantDot,
             ConstantPostDot,
             Dot,
             Identifier,
@@ -49,6 +47,12 @@ namespace ExpressiveSharp.Parser
                     return new OperatorToken(OperatorToken.OperatorType.Slash);
                 case "%":
                     return new OperatorToken(OperatorToken.OperatorType.Percent);
+                case "=":
+                    return new OperatorToken(OperatorToken.OperatorType.Equal);
+                case ",":
+                    return new OperatorToken(OperatorToken.OperatorType.Comma);
+                case ";":
+                    return new OperatorToken(OperatorToken.OperatorType.Semicolon);
             }
             throw new InvalidOperationException("Unknown operator " + code);
         }
@@ -56,7 +60,7 @@ namespace ExpressiveSharp.Parser
         public static IEnumerable<Token> Tokenize(string code)
         {
             var state = State.NextToken;
-            string accumulator = "";
+            var accumulator = "";
             foreach (var c in code)
             {
                 if (char.IsDigit(c))
@@ -69,6 +73,10 @@ namespace ExpressiveSharp.Parser
                             break;
                         case State.Constant:
                             accumulator += c;
+                            break;
+                        case State.ConstantDot:
+                            state = State.ConstantPostDot;
+                            accumulator += "." + c;
                             break;
                         case State.ConstantPostDot:
                             accumulator += c;
@@ -97,9 +105,10 @@ namespace ExpressiveSharp.Parser
                             accumulator = ".";
                             break;
                         case State.Constant:
-                            state = State.ConstantPostDot;
-                            accumulator += c;
+                            state = State.ConstantDot;
                             break;
+                        case State.ConstantDot:
+                            throw new InvalidOperationException("Code contains two consecutive dots");
                         case State.ConstantPostDot:
                             state = State.Dot;
                             yield return Constant(accumulator);
@@ -125,6 +134,12 @@ namespace ExpressiveSharp.Parser
                     switch (state)
                     {
                         case State.NextToken:
+                            state = State.Identifier;
+                            accumulator = "" + c;
+                            break;
+                        case State.ConstantDot:
+                            yield return Constant(accumulator);
+                            yield return Operator(".");
                             state = State.Identifier;
                             accumulator = "" + c;
                             break;
@@ -156,6 +171,10 @@ namespace ExpressiveSharp.Parser
                     {
                         case State.NextToken:
                             break;
+                        case State.ConstantDot:
+                            yield return Constant(accumulator);
+                            yield return Operator(".");
+                            break;
                         case State.Constant:
                         case State.ConstantPostDot:
                             yield return Constant(accumulator);
@@ -178,6 +197,10 @@ namespace ExpressiveSharp.Parser
                     case State.NextToken:
                         accumulator = "" + c;
                         state = State.Operator;
+                        break;
+                    case State.ConstantDot:
+                        yield return Constant(accumulator);
+                        yield return Operator(".");
                         break;
                     case State.Constant:
                     case State.ConstantPostDot:

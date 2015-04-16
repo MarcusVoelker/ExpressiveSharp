@@ -26,5 +26,12 @@ namespace ExpressiveSharp.Parser
                 new OperatorToken(OperatorToken.OperatorType.Star),
             }));
         }
+
+        [Test]
+        public void AstBuilderTest()
+        {
+            var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize("x*4+3.vec3(2,1)"));
+            Console.WriteLine(ast.ToString());
+        }
     }
 }

@@ -1,9 +1,16 @@
 ﻿using System;
+using System.Globalization;
 
 namespace ExpressiveSharp.Parser
 {
     internal abstract class Token
     {
+        public new abstract string ToString();
+
+        public virtual bool IsOperator(OperatorToken.OperatorType type)
+        {
+            return false;
+        }
     }
 
     internal class ConstantToken : Token, IEquatable<ConstantToken>
@@ -13,6 +20,11 @@ namespace ExpressiveSharp.Parser
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Value.Equals(other.Value);
+        }
+
+        public override string ToString()
+        {
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
 
         public override bool Equals(object obj)
@@ -32,7 +44,7 @@ namespace ExpressiveSharp.Parser
             Value = value;
         }
 
-        public float Value { get; private set; }
+        public float Value { get; }
 
         public static bool operator ==(ConstantToken lhs, Token rhs)
         {
@@ -57,6 +69,11 @@ namespace ExpressiveSharp.Parser
             return string.Equals(Name, other.Name);
         }
 
+        public override string ToString()
+        {
+            return Name;
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -66,7 +83,7 @@ namespace ExpressiveSharp.Parser
 
         public override int GetHashCode()
         {
-            return (Name != null ? Name.GetHashCode() : 0);
+            return Name?.GetHashCode() ?? 0;
         }
 
         public IdentifierToken(string name)
@@ -74,7 +91,7 @@ namespace ExpressiveSharp.Parser
             Name = name;
         }
 
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public static bool operator ==(IdentifierToken lhs, Token rhs)
         {
@@ -96,6 +113,11 @@ namespace ExpressiveSharp.Parser
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             return Type == other.Type;
+        }
+
+        public override string ToString()
+        {
+            return Type.ToString();
         }
 
         public override bool Equals(object obj)
@@ -120,13 +142,16 @@ namespace ExpressiveSharp.Parser
             Star,
             Slash,
             Percent,
+            Equal,
+            Comma,
+            Semicolon,
         }
         public OperatorToken(OperatorType type)
         {
             Type = type;
         }
 
-        public OperatorType Type { get; private set; }
+        public OperatorType Type { get; }
 
         public static bool operator ==(OperatorToken lhs, Token rhs)
         {
@@ -138,6 +163,11 @@ namespace ExpressiveSharp.Parser
         public static bool operator !=(OperatorToken lhs, Token rhs)
         {
             return !(lhs == rhs);
+        }
+
+        public override bool IsOperator(OperatorType type)
+        {
+            return Type == type;
         }
     }
 }
