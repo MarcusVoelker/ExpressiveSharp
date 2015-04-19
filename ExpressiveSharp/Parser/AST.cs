@@ -8,7 +8,7 @@ namespace ExpressiveSharp.Parser
 {
     internal class AST
     {
-        public override String ToString()
+        public override string ToString()
         {
             return Root.ToString();
         }
@@ -23,7 +23,7 @@ namespace ExpressiveSharp.Parser
 
     internal class ASTNode
     {
-        public new String ToString()
+        public override string ToString()
         {
             if (Children.Count == 0)
                 return Token.ToString();
@@ -36,10 +36,52 @@ namespace ExpressiveSharp.Parser
             Children = new List<ASTNode>();
         }
 
-        public Token Token { get; private set; }
+        public Token Token { get; }
 
-        public List<ASTNode> Children { get; private set; } 
+        public List<ASTNode> Children { get; }
 
+        public Dictionary<string, ASTNode> Match(ASTNode matcher)
+        {
+            var dict = new Dictionary<string, ASTNode>();
+            if (!(matcher.Token is IdentifierToken))
+                return null;
+
+            var id = (IdentifierToken) matcher.Token;
+            if (matcher.Children.Count == 0)
+            {
+                dict[id.Name] = this;
+                return dict;
+            }
+
+            if (matcher.Children.Count != Children.Count)
+                return null;
+
+            if (!(Token is IdentifierToken) || ((IdentifierToken) Token).Name != id.Name)
+                return null;
+
+            for (var i = 0; i < Children.Count; ++i)
+            {
+                var cDict = Children[i].Match(matcher.Children[i]);
+                if (cDict == null)
+                    return null;
+
+                foreach (var p in cDict)
+                    dict.Add(p.Key,p.Value);
+            }
+            return dict;
+        }
+
+        public ASTNode Replace(Dictionary<string, ASTNode> replacements)
+        {
+            var token = Token as IdentifierToken;
+            if ((token != null) && Children.Count == 0 && replacements.ContainsKey(token.Name))
+                return replacements[token.Name];
+
+            var newAST = new ASTNode(Token);
+            foreach(var c in Children)
+                newAST.Children.Add(c.Replace(replacements));
+            return newAST;
+        }
     }
 
 

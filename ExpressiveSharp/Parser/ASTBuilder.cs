@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ExpressiveSharp.Parser
 {
@@ -46,6 +47,7 @@ namespace ExpressiveSharp.Parser
             if (!tokens.Current.IsOperator(OperatorToken.OperatorType.RParen))
                 throw new InvalidOperationException("Expected RParen, but got " + tokens.Current);
 
+            tokens.MoveNext();
             return idNode;
         }
 
@@ -135,11 +137,62 @@ namespace ExpressiveSharp.Parser
             return node;
         }
 
+        private static ASTNode ReplaceInAst(Dictionary<string, KeyValuePair<ASTNode, ASTNode>> replacements, ASTNode ast)
+        {
+            for(var i = 0; i < ast.Children.Count; ++i)
+                ast.Children[i] = ReplaceInAst(replacements, ast.Children[i]);
+
+            var token = ast.Token as IdentifierToken;
+            if (token == null || !replacements.ContainsKey(token.Name))
+                return ast;
+
+            var replacement = replacements[token.Name];
+            var varMatches = ast.Match(replacement.Key);
+            return varMatches == null ? ast : replacement.Value.Replace(varMatches);
+        }
+
+        private static ASTNode Merge(List<ASTNode> lines)
+        {
+            var replacements = new Dictionary<string, KeyValuePair<ASTNode,ASTNode>>();
+            foreach (var line in lines)
+            {
+                if (!line.Token.IsOperator(OperatorToken.OperatorType.Equal))
+                    return ReplaceInAst(replacements, line);
+
+                var lhs = line.Children.First();
+                if (!(lhs.Token is IdentifierToken))
+                    throw new InvalidOperationException("Left-hand side of assignment " + line + " has to be named.");
+
+                var name = ((IdentifierToken) lhs.Token).Name;
+                replacements[name] = new KeyValuePair<ASTNode, ASTNode>(lhs, ReplaceInAst(replacements, line.Children.Last()));
+            }
+            throw new InvalidOperationException("No non-assignment line of code found.");
+        }
+
+        private static ASTNode Postprocess(ASTNode line)
+        {
+            for (var i = 0; i < line.Children.Count; ++i)
+                line.Children[i] = Postprocess(line.Children[i]);
+
+            if (line.Token.IsOperator(OperatorToken.OperatorType.Dot))
+            {
+                var node = line.Children.Last();
+                node.Children.Insert(0,line.Children.First());
+                return node;
+            }
+            return line;
+        }
+
         public static AST BuildAst(IEnumerable<Token> tokens)
         {
             var enumerator = tokens.GetEnumerator(); //TODO multiline
-            enumerator.MoveNext();
-            return new AST(BuildLine(enumerator));
+            var lines = new List<ASTNode>();
+            while (enumerator.MoveNext())
+            {
+                lines.Add(BuildLine(enumerator));
+            }
+            var singleLine = Postprocess(Merge(lines));
+            return new AST(singleLine);
         }
     }
 }
