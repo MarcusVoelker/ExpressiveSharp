@@ -1,4 +1,6 @@
 ﻿using System;
+using ExpressiveSharp.Expression.Nodes;
+using ExpressiveSharp.Parser;
 
 namespace ExpressiveSharp.Expression
 {
@@ -6,16 +8,31 @@ namespace ExpressiveSharp.Expression
     {
         private ExpressionNode rootNode;
 
-        public Expression(ExpressionNode rootNode)
+        private Expression(ExpressionNode rootNode)
         {
             this.rootNode = rootNode;
         }
-    }
 
-    public abstract class ExpressionNode
-    {
-        public abstract new String ToString();
+        private static ExpressionNode Translate(ASTNode node)
+        {
+            {
+                var token = node.Token as ConstantToken;
+                if (token != null)
+                    return new ConstantNode(token.Value);
+            }
+            {
+                var token = node.Token as OperatorToken;
+                if (token != null)
+                {
+                }
+            }
+            return null;
+        }
 
+        public Expression(string code)
+        {
+            var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize(code));
 
+        }
     }
 }
