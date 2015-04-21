@@ -67,6 +67,7 @@
     <Compile Include="Expression\Expression.cs" />
     <Compile Include="Expression\Nodes\ConstantNode.cs" />
     <Compile Include="Expression\Nodes\ExpressionNode.cs" />
+    <Compile Include="Expression\Nodes\VariableNode.cs" />
     <Compile Include="Parser\AST.cs" />
     <Compile Include="Parser\ASTBuilder.cs" />
     <Compile Include="Parser\ParserTests.cs" />

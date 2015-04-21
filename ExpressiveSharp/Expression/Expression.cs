@@ -21,6 +21,15 @@ namespace ExpressiveSharp.Expression
                     return new ConstantNode(token.Value);
             }
             {
+                var token = node.Token as IdentifierToken;
+                if (token != null)
+                {
+                    if (node.Children.Count == 0)
+                        return new VariableNode(token.Name);
+
+                }
+            }
+            {
                 var token = node.Token as OperatorToken;
                 if (token != null)
                 {
