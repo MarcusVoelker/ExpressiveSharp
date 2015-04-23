@@ -37,5 +37,12 @@ namespace ExpressiveSharp.Parser
             var ast3 = ASTBuilder.BuildAst(Tokenizer.Tokenize("f(a,b,c) = a+b*c; g(a) = f(f(a-1,a-2,a-3),f(a-4,a-5,a-6),f(a-7,a-8,a-9)); g(5)"));
             Console.WriteLine(ast3.ToString());
         }
+
+        [Test]
+        public void ExpressionBuildingTest()
+        {
+            var exp = new Expression.Expression("x*4+(y-1)%4");
+            Console.WriteLine(exp);
+        }
     }
 }

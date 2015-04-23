@@ -15,6 +15,7 @@ namespace ExpressiveSharp.Parser
                 if (!tokens.Current.IsOperator(OperatorToken.OperatorType.RParen))
                     throw new InvalidOperationException("Expected RParen, but got " + tokens.Current);
 
+                tokens.MoveNext();
                 return inner;
             }
 

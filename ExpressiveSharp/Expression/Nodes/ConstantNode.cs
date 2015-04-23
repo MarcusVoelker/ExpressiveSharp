@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
-    internal class ConstantNode : ExpressionNode
+    internal class ConstantNode : LeafNode
     {
         public ConstantNode(float constant)
         {

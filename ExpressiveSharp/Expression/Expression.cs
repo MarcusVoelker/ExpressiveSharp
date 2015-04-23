@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ExpressiveSharp.Expression.Nodes;
+using ExpressiveSharp.Expression.Nodes.Builtin;
 using ExpressiveSharp.Parser;
 
 namespace ExpressiveSharp.Expression
@@ -26,13 +29,35 @@ namespace ExpressiveSharp.Expression
                 {
                     if (node.Children.Count == 0)
                         return new VariableNode(token.Name);
-
                 }
             }
             {
+                var children = node.Children.Select(Translate);
                 var token = node.Token as OperatorToken;
                 if (token != null)
                 {
+                    switch (token.Type)
+                    {
+                        case OperatorToken.OperatorType.Dot:
+                        case OperatorToken.OperatorType.LParen:
+                        case OperatorToken.OperatorType.RParen:
+                        case OperatorToken.OperatorType.Comma:
+                        case OperatorToken.OperatorType.Semicolon:
+                        case OperatorToken.OperatorType.Equal:
+                            throw new InvalidOperationException("Stray operator " + token);
+                        case OperatorToken.OperatorType.Plus:
+                            return new AddNode(children.ToList());
+                        case OperatorToken.OperatorType.Minus:
+                            return new SubNode(children.ToList());
+                        case OperatorToken.OperatorType.Star:
+                            return new MulNode(children.ToList());
+                        case OperatorToken.OperatorType.Slash:
+                            return new DivNode(children.ToList());
+                        case OperatorToken.OperatorType.Percent:
+                            return new ModNode(children.ToList());
+                        default:
+                            throw new ArgumentOutOfRangeException("Unhandled operator " + token);
+                    }
                 }
             }
             return null;
@@ -41,7 +66,12 @@ namespace ExpressiveSharp.Expression
         public Expression(string code)
         {
             var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize(code));
+            rootNode = Translate(ast.Root);
+        }
 
+        public override string ToString()
+        {
+            return rootNode.ToString();
         }
     }
 }
