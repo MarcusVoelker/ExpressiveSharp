@@ -1,22 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
-    internal class MulNode : FunctionNode
+    internal class MulNode : AliasNode
     {
-        public override string FunctionName => "Mul";
+        public override string FunctionName => "mul";
 
         public override string ToString()
         {
             return "(" + Children.First() + " * " + Children.Last() + ")";
         }
 
-        public MulNode(List<ExpressionNode> children) : base(children)
+        protected override ExpressionNode Replace()
         {
+            return new CompMul(Children.ToList());
+        }
+
+        public MulNode(IEnumerable<ExpressionNode> children) : base(children)
+        {
+
         }
     }
 }

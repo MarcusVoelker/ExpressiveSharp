@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
     internal class DivNode : FunctionNode
     {
-        public override string FunctionName => "Div";
+        public override string FunctionName => "div";
+
+        public override TypeClass TypeClass => TypeClass.TensorTensorTensor;
 
         public override string ToString()
         {
             return "(" + Children.First() + " / " + Children.Last() + ")";
         }
 
-        public DivNode(List<ExpressionNode> children) : base(children)
+        public DivNode(IEnumerable<ExpressionNode> children) : base(children)
         {
 
         }

@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
     internal class ModNode : FunctionNode
     {
-        public override string FunctionName => "Mod";
+        public override string FunctionName => "mod";
+
+        public override TypeClass TypeClass => TypeClass.TensorTensorTensor;
 
         public override string ToString()
         {
             return "(" + Children.First() + " % " + Children.Last() + ")";
         }
 
-        public ModNode(List<ExpressionNode> children) : base(children)
+        public ModNode(IEnumerable<ExpressionNode> children) : base(children)
         {
 
         }

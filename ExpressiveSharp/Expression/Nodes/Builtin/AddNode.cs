@@ -5,7 +5,10 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
     internal class AddNode : FunctionNode
     {
-        public override string FunctionName => "Add";
+        public override string FunctionName => "add";
+
+        public override TypeClass TypeClass
+            => Children.Count == 1 ? TypeClass.TensorTensor : TypeClass.TensorTensorTensor;
 
         public override string ToString()
         {
@@ -14,7 +17,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             return "(" + Children.First() + " + " + Children.Last() + ")";
         }
 
-        public AddNode(List<ExpressionNode> children) : base(children)
+        public AddNode(IEnumerable<ExpressionNode> children) : base(children)
         {
         }
     }

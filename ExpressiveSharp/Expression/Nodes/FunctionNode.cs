@@ -7,14 +7,16 @@ namespace ExpressiveSharp.Expression.Nodes
     {
         private readonly List<ExpressionNode> children;
 
-        protected FunctionNode(List<ExpressionNode> children)
+        protected FunctionNode(IEnumerable<ExpressionNode> children)
         {
-            this.children = children;
+            this.children = children.ToList();
         }
 
         public IReadOnlyList<ExpressionNode> Children => children;
 
         public abstract string FunctionName { get; }
+
+        public abstract TypeClass TypeClass { get; }
 
         public override string ToString()
         {
