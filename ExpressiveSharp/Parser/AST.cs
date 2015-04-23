@@ -15,7 +15,7 @@ namespace ExpressiveSharp.Parser
             Root = root;
         }
 
-        public ASTNode Root { get; private set; }
+        public ASTNode Root { get; }
     }
 
     internal class ASTNode
@@ -24,7 +24,7 @@ namespace ExpressiveSharp.Parser
         {
             if (Children.Count == 0)
                 return Token.ToString();
-            return Token.ToString() + "(" + Children.Select(c => c.ToString()).Aggregate((l, r) => l + "," + r) + ")";
+            return Token + "(" + Children.Select(c => c.ToString()).Aggregate((l, r) => l + "," + r) + ")";
         }
 
         public ASTNode(Token token)

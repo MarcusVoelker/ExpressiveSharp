@@ -2,7 +2,7 @@
 {
     internal abstract class ExpressionNode
     {
-        public abstract new string ToString();
+        public abstract override string ToString();
 
 
     }

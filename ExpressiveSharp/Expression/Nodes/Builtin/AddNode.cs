@@ -10,8 +10,8 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
         public override string ToString()
         {
             if (Children.Count == 1)
-                return "+" + Children.First().ToString();
-            return "(" + Children.First().ToString() + " + " + Children.Last().ToString() + ")";
+                return "+" + Children.First();
+            return "(" + Children.First() + " + " + Children.Last() + ")";
         }
 
         public AddNode(List<ExpressionNode> children) : base(children)

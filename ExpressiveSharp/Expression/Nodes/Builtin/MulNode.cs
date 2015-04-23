@@ -12,7 +12,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
 
         public override string ToString()
         {
-            return "(" + Children.First().ToString() + " * " + Children.Last().ToString() + ")";
+            return "(" + Children.First() + " * " + Children.Last() + ")";
         }
 
         public MulNode(List<ExpressionNode> children) : base(children)

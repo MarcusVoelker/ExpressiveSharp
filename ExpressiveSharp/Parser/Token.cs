@@ -5,7 +5,7 @@ namespace ExpressiveSharp.Parser
 {
     internal abstract class Token
     {
-        public new abstract string ToString();
+        public override abstract string ToString();
 
         public virtual bool IsOperator(OperatorToken.OperatorType type)
         {
