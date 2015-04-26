@@ -23,5 +23,15 @@ namespace ExpressiveSharp.Expression.Nodes
             return FunctionName + "(" +
                    Children.Select(n => n.ToString()).Aggregate((l, r) => l + ", " + r) + ")";
         }
+
+        protected abstract ExpressionNode InternalPreprocess(Dictionary<string, TensorType> variableTypes);
+
+        public override ExpressionNode Preprocess(Dictionary<string, TensorType> variableTypes)
+        {
+            for (var i = 0; i < Children.Count; ++i)
+                children[i] = children[i].Preprocess(variableTypes);
+
+            return InternalPreprocess(variableTypes);
+        }
     }
 }

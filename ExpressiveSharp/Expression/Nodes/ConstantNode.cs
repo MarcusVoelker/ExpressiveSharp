@@ -1,23 +1,25 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
     internal class ConstantNode : LeafNode
     {
-        public ConstantNode(float constant)
+        public ConstantNode(Tensor constant)
         {
             Constant = constant;
         }
 
-        public float Constant { get; }
+        public Tensor Constant { get; }
         public override string ToString()
         {
-            return Constant.ToString(CultureInfo.InvariantCulture);
+            return Constant.ToString();
         }
 
-        public override void Preprocess()
+        public override ExpressionNode Preprocess(Dictionary<string, TensorType> variableTypes)
         {
-            throw new System.NotImplementedException();
+            OutputType = Constant.Type;
+            return this;
         }
     }
 }

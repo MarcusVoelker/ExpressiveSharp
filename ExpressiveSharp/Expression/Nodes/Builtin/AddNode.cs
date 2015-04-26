@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
-    internal class AddNode : FunctionNode
+    internal class AddNode : BuiltinNode
     {
         public override string FunctionName => "add";
 

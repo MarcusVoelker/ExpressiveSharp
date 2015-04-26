@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
-    internal class CompMul : FunctionNode
+    internal class CompMul : BuiltinNode
     {
         public override string FunctionName => "compMul";
 

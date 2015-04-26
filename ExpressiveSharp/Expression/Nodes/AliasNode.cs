@@ -11,5 +11,10 @@ namespace ExpressiveSharp.Expression.Nodes
         protected AliasNode(IEnumerable<ExpressionNode> children) : base(children)
         {
         }
+
+        protected override ExpressionNode InternalPreprocess(Dictionary<string, TensorType> variableTypes)
+        {
+            return Replace().Preprocess(variableTypes);
+        }
     }
 }
