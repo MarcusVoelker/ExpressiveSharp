@@ -14,5 +14,10 @@ namespace ExpressiveSharp.Expression.Nodes
         {
             return Constant.ToString(CultureInfo.InvariantCulture);
         }
+
+        public override void Preprocess()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -77,6 +77,7 @@
     <Compile Include="Expression\Nodes\FunctionNode.cs" />
     <Compile Include="Expression\Nodes\LeafNode.cs" />
     <Compile Include="Expression\Nodes\VariableNode.cs" />
+    <Compile Include="Expression\Tensor.cs" />
     <Compile Include="Expression\TensorType.cs" />
     <Compile Include="Parser\AST.cs" />
     <Compile Include="Parser\ASTBuilder.cs" />

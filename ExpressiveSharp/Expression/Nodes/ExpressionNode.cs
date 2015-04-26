@@ -1,4 +1,6 @@
-﻿namespace ExpressiveSharp.Expression.Nodes
+﻿using System.Dynamic;
+
+namespace ExpressiveSharp.Expression.Nodes
 {
     internal enum TypeClass
     {
@@ -15,8 +17,12 @@
 
     internal abstract class ExpressionNode
     {
+
+        public TensorType OutputType { get; protected set; }
+
         public abstract override string ToString();
 
+        public abstract void Preprocess();
 
     }
 }
