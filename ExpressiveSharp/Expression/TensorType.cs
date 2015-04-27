@@ -70,14 +70,6 @@ namespace ExpressiveSharp.Expression
             return dimensions.Aggregate(1, (current, i) => current*i);
         }
 
-        public bool IsPromotableTo(TensorType other)
-        {
-            if (other.Dimensions.Count < Dimensions.Count)
-                return false;
-
-            return !Dimensions.Where((t, i) => other.Dimensions[i] != t).Any();
-        }
-
         public bool IsScalar()
         {
             return Dimensions.Count == 0;
@@ -87,6 +79,19 @@ namespace ExpressiveSharp.Expression
         {
             var type = new TensorType(Dimensions.Count);
             return new Tensor(type, dimensions.Select(i => (float) i).ToList());
+        }
+
+        public override string ToString()
+        {
+            switch (Dimensions.Count)
+            {
+                case 0:
+                    return "()";
+                case 1:
+                    return "(" + Dimensions[0] + ")";
+            }
+
+            return "(" + Dimensions.Select(i => i.ToString()).Aggregate((l, r) => l + ", " + r) + ")";
         }
     }
 }

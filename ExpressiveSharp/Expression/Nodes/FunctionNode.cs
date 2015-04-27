@@ -5,7 +5,7 @@ namespace ExpressiveSharp.Expression.Nodes
 {
     internal abstract class FunctionNode : ExpressionNode
     {
-        private readonly List<ExpressionNode> children;
+        protected readonly List<ExpressionNode> children;
 
         protected FunctionNode(IEnumerable<ExpressionNode> children)
         {

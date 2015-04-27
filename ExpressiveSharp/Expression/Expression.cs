@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ExpressiveSharp.Expression.Nodes;
 using ExpressiveSharp.Expression.Nodes.Builtin;
@@ -62,10 +63,11 @@ namespace ExpressiveSharp.Expression
             return null;
         }
 
-        public Expression(string code)
+        public Expression(string code, Dictionary<string,TensorType> varTypes)
         {
             var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize(code));
             rootNode = Translate(ast.Root);
+            rootNode = rootNode.Preprocess(varTypes);
         }
 
         public override string ToString()

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using ExpressiveSharp.Expression;
 using NUnit.Framework;
 
 namespace ExpressiveSharp.Parser
@@ -41,7 +43,11 @@ namespace ExpressiveSharp.Parser
         [Test]
         public void ExpressionBuildingTest()
         {
-            var exp = new Expression.Expression("x*4+(y-1)%4");
+            var exp = new Expression.Expression("x*4+(y-1)%4", new Dictionary<string, TensorType>
+            {
+                {"x", new TensorType()},
+                {"y", new TensorType(3)}
+            });
             Console.WriteLine(exp);
         }
     }
