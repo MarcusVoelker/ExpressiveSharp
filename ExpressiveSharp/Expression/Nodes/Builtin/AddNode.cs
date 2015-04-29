@@ -17,6 +17,13 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             return "(" + Children.First() + " + " + Children.Last() + ")";
         }
 
+        protected override Tensor Evaluate(IEnumerable<Tensor> childrenTensors)
+        {
+            var enumerable = childrenTensors as IList<Tensor> ?? childrenTensors.ToList();
+            var t = new Tensor(enumerable.First().Type);
+            return enumerable.Aggregate(t, (current, c) => current + c);
+        }
+
         public AddNode(IEnumerable<ExpressionNode> children) : base(children)
         {
         }

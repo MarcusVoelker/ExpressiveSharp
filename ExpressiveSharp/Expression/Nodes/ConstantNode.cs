@@ -21,5 +21,15 @@ namespace ExpressiveSharp.Expression.Nodes
             OutputType = Constant.Type;
             return this;
         }
+
+        public override Tensor GetConstant()
+        {
+            return Constant;
+        }
+
+        public override bool IsConstant()
+        {
+            return true;
+        }
     }
 }

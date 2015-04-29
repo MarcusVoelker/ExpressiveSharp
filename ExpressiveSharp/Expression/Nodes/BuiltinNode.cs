@@ -48,5 +48,31 @@ namespace ExpressiveSharp.Expression.Nodes
             }
             return this;
         }
+
+        public override bool IsConstant()
+        {
+            return Children.All(c => c.IsConstant());
+        }
+
+        public override Tensor GetConstant()
+        {
+            if (!IsConstant())
+                throw new InvalidOperationException("Non-constant node!");
+
+            return Evaluate(Children.Select(c => c.GetConstant()));
+        }
+
+        public override ExpressionNode FoldConstants()
+        {
+            if (IsConstant())
+                return new ConstantNode(GetConstant());
+            for (var i = 0; i < children.Count; ++i)
+            {
+                children[i] = children[i].FoldConstants();
+            }
+            return this;
+        }
+
+        protected abstract Tensor Evaluate(IEnumerable<Tensor> childrenTensors);
     }
 }

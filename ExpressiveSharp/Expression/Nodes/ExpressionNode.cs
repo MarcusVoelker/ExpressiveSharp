@@ -58,5 +58,10 @@ namespace ExpressiveSharp.Expression.Nodes
 
         public abstract ExpressionNode Preprocess(Dictionary<string,TensorType> variableTypes);
 
+        public abstract ExpressionNode FoldConstants();
+
+        public abstract Tensor GetConstant();
+
+        public abstract bool IsConstant();
     }
 }

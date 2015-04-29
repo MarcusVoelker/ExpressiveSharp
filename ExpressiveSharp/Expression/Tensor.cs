@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework.Constraints;
 
 namespace ExpressiveSharp.Expression
 {
@@ -44,6 +45,76 @@ namespace ExpressiveSharp.Expression
         public static implicit operator Tensor(float x)
         {
             return new Tensor(new TensorType(), x);
+        }
+
+        public static Tensor operator+(Tensor lhs, Tensor rhs)
+        {
+            if (lhs.Type != rhs.Type)
+                throw new InvalidOperationException("Non-matching Tensor types " + lhs.Type + " and " + rhs.Type);
+
+            var result = new Tensor(lhs.Type,lhs.Data);
+            for (var i = 0; i < rhs.Type.ElementCount(); ++i)
+            {
+                result.Data[i] += rhs.Data[i];
+            }
+            return result;
+        }
+
+        public static Tensor operator -(Tensor lhs, Tensor rhs)
+        {
+            if (lhs.Type != rhs.Type)
+                throw new InvalidOperationException("Non-matching Tensor types " + lhs.Type + " and " + rhs.Type);
+
+            var result = new Tensor(lhs.Type, lhs.Data);
+            for (var i = 0; i < rhs.Type.ElementCount(); ++i)
+            {
+                result.Data[i] -= rhs.Data[i];
+            }
+            return result;
+        }
+
+        public static Tensor operator *(Tensor lhs, Tensor rhs)
+        {
+            if (lhs.Type != rhs.Type)
+                throw new InvalidOperationException("Non-matching Tensor types " + lhs.Type + " and " + rhs.Type);
+
+            var result = new Tensor(lhs.Type, lhs.Data);
+            for (var i = 0; i < rhs.Type.ElementCount(); ++i)
+            {
+                result.Data[i] *= rhs.Data[i];
+            }
+            return result;
+        }
+
+        public static Tensor operator /(Tensor lhs, Tensor rhs)
+        {
+            if (lhs.Type != rhs.Type)
+                throw new InvalidOperationException("Non-matching Tensor types " + lhs.Type + " and " + rhs.Type);
+
+            var result = new Tensor(lhs.Type, lhs.Data);
+            for (var i = 0; i < rhs.Type.ElementCount(); ++i)
+            {
+                result.Data[i] /= rhs.Data[i];
+            }
+            return result;
+        }
+
+        public static Tensor operator %(Tensor lhs, Tensor rhs)
+        {
+            if (lhs.Type != rhs.Type)
+                throw new InvalidOperationException("Non-matching Tensor types " + lhs.Type + " and " + rhs.Type);
+
+            var result = new Tensor(lhs.Type, lhs.Data);
+            for (var i = 0; i < rhs.Type.ElementCount(); ++i)
+            {
+                result.Data[i] %= rhs.Data[i];
+            }
+            return result;
+        }
+
+        public TensorType ToType()
+        {
+            return new TensorType(Data.Select(f => (int) f));
         }
     }
 }

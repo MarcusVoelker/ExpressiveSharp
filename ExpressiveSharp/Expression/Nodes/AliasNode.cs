@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
@@ -15,6 +16,21 @@ namespace ExpressiveSharp.Expression.Nodes
         protected override ExpressionNode InternalPreprocess(Dictionary<string, TensorType> variableTypes)
         {
             return Replace().Preprocess(variableTypes);
+        }
+
+        public override ExpressionNode FoldConstants()
+        {
+            throw new InvalidOperationException("Leftover alias node!");
+        }
+
+        public override Tensor GetConstant()
+        {
+            throw new InvalidOperationException("Leftover alias node!");
+        }
+
+        public override bool IsConstant()
+        {
+            throw new InvalidOperationException("Leftover alias node!");
         }
     }
 }

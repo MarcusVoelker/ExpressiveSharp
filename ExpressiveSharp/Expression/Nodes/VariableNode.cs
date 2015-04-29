@@ -24,5 +24,20 @@ namespace ExpressiveSharp.Expression.Nodes
             OutputType = variableTypes[Variable];
             return this;
         }
+
+        public override ExpressionNode FoldConstants()
+        {
+            return this;
+        }
+
+        public override Tensor GetConstant()
+        {
+            throw new InvalidOperationException("Non-constant node!");
+        }
+
+        public override bool IsConstant()
+        {
+            return false;
+        }
     }
 }
