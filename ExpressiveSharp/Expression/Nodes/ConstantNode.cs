@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
@@ -30,6 +33,16 @@ namespace ExpressiveSharp.Expression.Nodes
         public override bool IsConstant()
         {
             return true;
+        }
+
+        public override IEnumerable<LLVMValueRef> BuildLLVM(LLVMBuilderRef builder, Dictionary<string, LLVMValueRef> vars)
+        {
+            return Constant.Data.Select(t => LLVM.ConstReal(LLVM.FloatType(), t));
+        }
+
+        public override IEnumerable<Tuple<string, TensorType>> GetVariables()
+        {
+            yield break;
         }
     }
 }

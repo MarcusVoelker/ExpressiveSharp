@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
@@ -24,6 +26,11 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             var enumerable = childrenTensors as IList<Tensor> ?? childrenTensors.ToList();
             var t = new Tensor(enumerable.First().Type);
             return enumerable.Aggregate(t, (current, c) => current % c);
+        }
+
+        protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
+        {
+            throw new NotImplementedException("Mod not implemented");
         }
     }
 }

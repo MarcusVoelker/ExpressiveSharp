@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
@@ -34,6 +35,19 @@ namespace ExpressiveSharp.Expression.Nodes
                 children[i] = children[i].Preprocess(variableTypes);
 
             return InternalPreprocess(variableTypes);
+        }
+
+        protected abstract IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children);
+
+        public override IEnumerable<LLVMValueRef> BuildLLVM(LLVMBuilderRef builder, Dictionary<string, LLVMValueRef> vars)
+        {
+            var cs = Children.Select(c => c.BuildLLVM(builder,vars));
+            return InternalBuildLLVM(builder, cs);
+        }
+
+        public override IEnumerable<Tuple<string, TensorType>> GetVariables()
+        {
+            return children.SelectMany(c => c.GetVariables());
         }
     }
 }

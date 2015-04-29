@@ -4,6 +4,7 @@ using System.Linq;
 using ExpressiveSharp.Expression.Nodes;
 using ExpressiveSharp.Expression.Nodes.Builtin;
 using ExpressiveSharp.Parser;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression
 {
@@ -67,7 +68,13 @@ namespace ExpressiveSharp.Expression
         {
             var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize(code));
             rootNode = Translate(ast.Root);
-            rootNode = rootNode.Preprocess(varTypes);
+            rootNode = rootNode.Preprocess(varTypes).FoldConstants();
+        }
+
+        public void JITCompile()
+        {
+            foreach (var v in rootNode.BuildLLVM())
+                LLVM.DumpValue(v);
         }
 
         public override string ToString()

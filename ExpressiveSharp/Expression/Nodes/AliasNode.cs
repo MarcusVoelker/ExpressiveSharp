@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
@@ -29,6 +30,11 @@ namespace ExpressiveSharp.Expression.Nodes
         }
 
         public override bool IsConstant()
+        {
+            throw new InvalidOperationException("Leftover alias node!");
+        }
+
+        protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
         {
             throw new InvalidOperationException("Leftover alias node!");
         }

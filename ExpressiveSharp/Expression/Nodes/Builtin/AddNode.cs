@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
@@ -15,6 +16,17 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             if (Children.Count == 1)
                 return "+" + Children.First();
             return "(" + Children.First() + " + " + Children.Last() + ")";
+        }
+
+        protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
+        {
+            var cs = children.ToList();
+            var res = cs[0];
+            for (var i = 1; i < cs.Count; ++i)
+            {
+                res = res.Zip(cs[i], (l, r) => LLVM.BuildFAdd(builder, l, r, "add"));
+            }
+            return res;
         }
 
         protected override Tensor Evaluate(IEnumerable<Tensor> childrenTensors)

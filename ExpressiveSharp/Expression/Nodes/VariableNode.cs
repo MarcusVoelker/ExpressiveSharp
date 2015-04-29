@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes
 {
@@ -11,6 +13,7 @@ namespace ExpressiveSharp.Expression.Nodes
         }
 
         public string Variable { get; }
+        
         public override string ToString()
         {
             return Variable;
@@ -38,6 +41,17 @@ namespace ExpressiveSharp.Expression.Nodes
         public override bool IsConstant()
         {
             return false;
+        }
+
+        public override IEnumerable<LLVMValueRef> BuildLLVM(LLVMBuilderRef builder, Dictionary<string, LLVMValueRef> vars)
+        {
+            for (var i = 0; i < OutputType.ElementCount(); ++i)
+                yield return vars[Variable + "#" + i];
+        }
+
+        public override IEnumerable<Tuple<string, TensorType>> GetVariables()
+        {
+            yield return new Tuple<string,TensorType>(Variable,OutputType);
         }
     }
 }

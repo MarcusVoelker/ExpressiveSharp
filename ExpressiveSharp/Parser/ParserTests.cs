@@ -50,5 +50,17 @@ namespace ExpressiveSharp.Parser
             });
             Console.WriteLine(exp);
         }
+
+        [Test]
+        public void JittingTest()
+        {
+            var exp = new Expression.Expression("x*4+(y-1)", new Dictionary<string, TensorType>
+            {
+                {"x", new TensorType()},
+                {"y", new TensorType()}
+            });
+            Console.WriteLine(exp);
+            exp.JITCompile();
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using LLVMSharp;
 
 namespace ExpressiveSharp.Expression.Nodes.Builtin
 {
@@ -47,6 +48,11 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
                 cIndex = (cIndex + 1)%cTensors.Count;
             }
             return result;
+        }
+
+        protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
+        {
+            throw new NotImplementedException("Mod not implemented");
         }
     }
 }
