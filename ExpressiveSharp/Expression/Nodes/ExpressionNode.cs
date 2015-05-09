@@ -3,6 +3,8 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using ExpressiveSharp.Expression.Nodes.Builtin;
 using LLVMSharp;
 
@@ -69,31 +71,74 @@ namespace ExpressiveSharp.Expression.Nodes
 
         public abstract IEnumerable<LLVMValueRef> BuildLLVM(LLVMBuilderRef builder, Dictionary<string, LLVMValueRef> vars);
 
-        public IEnumerable<LLVMValueRef> BuildLLVM()
+        public Expression.RawExpressionFunction BuildLLVM()
         {
             var vars = GetVariables().ToList();
             vars.Sort();
             var module = LLVM.ModuleCreateWithName("JIT");
-            var args = vars.Select(x => LLVM.FloatType());
-            var func = LLVM.AddFunction(module, "Test", LLVM.FunctionType(LLVM.FloatType(), out args.ToArray()[0], (uint) vars.Count(), new LLVMBool(0)));
-            
-            var varDict = new Dictionary<string, LLVMValueRef>();
-            var ctr = 0;
-            foreach (var v in vars)
-            {
-                for (var i = 0; i < v.Item2.ElementCount(); ++i)
-                {
-                    varDict[v.Item1 + "#" + i] = LLVM.GetParam(func, (uint) ctr);
-                    ctr++;
-                }
-            }
+            var args = new[] {LLVM.PointerType(LLVM.FloatType(),0), LLVM.PointerType(LLVM.FloatType(),0) };
+            var func = LLVM.AddFunction(module, "Test", LLVM.FunctionType(LLVM.VoidType(), out args[0], 2, new LLVMBool(0)));
 
             var bb = LLVM.AppendBasicBlock(func, "BB");
             var builder = LLVM.CreateBuilder();
             LLVM.PositionBuilderAtEnd(builder, bb);
-            var ret = BuildLLVM(builder,varDict);
-            LLVM.BuildRet(builder,ret.First());
-            yield return func;
+
+            var varDict = new Dictionary<string, LLVMValueRef>();
+            var inParam = LLVM.GetParam(func, 0);
+            var outParam = LLVM.GetParam(func, 1);
+            foreach (var v in vars)
+            {
+                for (var i = 0; i < v.Item2.ElementCount(); ++i)
+                {
+                    var indices = new[] {LLVM.ConstInt(LLVM.Int32Type(),(ulong) i,new LLVMBool(0))};
+                    varDict[v.Item1 + "#" + i] = LLVM.BuildLoad(builder,LLVM.BuildGEP(builder,inParam,out indices[0],1,"inptr"),"inval");
+                }
+            }
+            var rets = BuildLLVM(builder,varDict);
+            int ctr = 0;
+            foreach (var ret in rets)
+            {
+                var indices = new[] { LLVM.ConstInt(LLVM.Int32Type(), (ulong)ctr, new LLVMBool(0)) };
+                var outVal = LLVM.BuildGEP(builder, outParam, out indices[0], 1, "outptr");
+                LLVM.BuildStore(builder, ret, outVal);
+                ctr++;
+            }
+            LLVM.BuildRetVoid(builder);
+
+            LLVMExecutionEngineRef engine;
+
+            LLVM.LinkInMCJIT();
+            LLVM.InitializeX86Target();
+            LLVM.InitializeX86TargetInfo();
+            LLVM.InitializeX86TargetMC();
+            LLVM.InitializeX86AsmPrinter();
+
+            var platform = Environment.OSVersion.Platform;
+            if (platform == PlatformID.Win32NT) // On Windows, LLVM currently (3.6) does not support PE/COFF
+            {
+                LLVM.SetTarget(module, Marshal.PtrToStringAnsi(LLVM.GetDefaultTargetTriple()) + "-elf");
+            }
+
+            LLVMMCJITCompilerOptions options;
+            var optionsSize = (4 * sizeof(int)) + IntPtr.Size; // LLVMMCJITCompilerOptions has 4 ints and a pointer
+
+            IntPtr error;
+
+            LLVM.InitializeMCJITCompilerOptions(out options, optionsSize);
+            LLVM.CreateMCJITCompilerForModule(out engine, module, out options, optionsSize, out error);
+
+            var passManager = LLVM.CreateFunctionPassManagerForModule(module);
+            LLVM.AddTargetData(LLVM.GetExecutionEngineTargetData(engine), passManager);
+            LLVM.AddBasicAliasAnalysisPass(passManager);
+            LLVM.AddPromoteMemoryToRegisterPass(passManager);
+            LLVM.AddInstructionCombiningPass(passManager);
+            LLVM.AddReassociatePass(passManager);
+            LLVM.AddGVNPass(passManager);
+            LLVM.AddCFGSimplificationPass(passManager);
+            LLVM.InitializeFunctionPassManager(passManager);
+            LLVM.RunFunctionPassManager(passManager, func);
+
+            return (Expression.RawExpressionFunction) Marshal.GetDelegateForFunctionPointer(LLVM.GetPointerToGlobal(engine, func), typeof(Expression.RawExpressionFunction));
         }
 
         public abstract IEnumerable<Tuple<string, TensorType>> GetVariables();

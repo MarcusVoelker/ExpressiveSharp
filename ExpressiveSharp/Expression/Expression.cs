@@ -13,6 +13,9 @@ namespace ExpressiveSharp.Expression
     {
         private ExpressionNode rootNode;
 
+        public delegate Tensor ExpressionFunction(Tensor[] args);
+        public delegate void RawExpressionFunction(float[] args, float[] outs);
+
         private Expression(ExpressionNode rootNode)
         {
             this.rootNode = rootNode;
@@ -65,19 +68,33 @@ namespace ExpressiveSharp.Expression
             return null;
         }
 
-        public Expression(string code, Dictionary<string,TensorType> varTypes)
+        public Expression(string code, Dictionary<string, TensorType> varTypes)
         {
             var ast = ASTBuilder.BuildAst(Tokenizer.Tokenize(code));
             rootNode = Translate(ast.Root);
             rootNode = rootNode.Preprocess(varTypes).FoldConstants();
         }
 
-        public void JITCompile()
+        public ExpressionFunction JITCompile()
         {
-            foreach (var ptr in rootNode.BuildLLVM().Select(LLVM.PrintValueToString))
+            var raw = rootNode.BuildLLVM();
+            return args =>
             {
-                Console.WriteLine(Marshal.PtrToStringAnsi(ptr));
-            }
+                var size = args.Sum(t => t.Type.ElementCount());
+                var data = new float[size];
+                var ctr = 0;
+                foreach (var v in args.SelectMany(t => t.Data))
+                    data[ctr++] = v;
+
+                var outs = new float[rootNode.OutputType.ElementCount()];
+                raw(data, outs);
+                return new Tensor(rootNode.OutputType,outs);
+            };
+        }
+
+        public RawExpressionFunction RawJITCompile()
+        {
+            return rootNode.BuildLLVM();
         }
 
         public override string ToString()
