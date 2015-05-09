@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Expression\Expression.cs" />
+    <Compile Include="Expression\ExpressionTests.cs" />
     <Compile Include="Expression\Nodes\AliasNode.cs" />
     <Compile Include="Expression\Nodes\BuiltinNode.cs" />
     <Compile Include="Expression\Nodes\Builtin\AddNode.cs" />

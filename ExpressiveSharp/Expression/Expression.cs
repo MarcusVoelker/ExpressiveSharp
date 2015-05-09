@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ExpressiveSharp.Expression.Nodes;
 using ExpressiveSharp.Expression.Nodes.Builtin;
 using ExpressiveSharp.Parser;
@@ -73,8 +74,10 @@ namespace ExpressiveSharp.Expression
 
         public void JITCompile()
         {
-            foreach (var v in rootNode.BuildLLVM())
-                LLVM.DumpValue(v);
+            foreach (var ptr in rootNode.BuildLLVM().Select(LLVM.PrintValueToString))
+            {
+                Console.WriteLine(Marshal.PtrToStringAnsi(ptr));
+            }
         }
 
         public override string ToString()

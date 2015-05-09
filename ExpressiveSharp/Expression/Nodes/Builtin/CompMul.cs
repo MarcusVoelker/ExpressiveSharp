@@ -20,7 +20,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
         protected override Tensor Evaluate(IEnumerable<Tensor> childrenTensors)
         {
             var enumerable = childrenTensors as IList<Tensor> ?? childrenTensors.ToList();
-            var t = new Tensor(enumerable.First().Type);
+            var t = new Tensor(enumerable.First().Type,1);
             return enumerable.Aggregate(t, (current, c) => current * c);
         }
 
@@ -30,7 +30,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             var res = cs[0];
             for (var i = 1; i < cs.Count; ++i)
             {
-                res = res.Zip(cs[i], (l, r) => LLVM.BuildFMul(builder, l, r, "add"));
+                res = res.Zip(cs[i], (l, r) => LLVM.BuildFMul(builder, l, r, "mul"));
             }
             return res;
         }

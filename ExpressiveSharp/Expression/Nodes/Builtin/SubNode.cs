@@ -35,7 +35,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             var res = cs[0];
             for (var i = 1; i < cs.Count; ++i)
             {
-                res = res.Zip(cs[i], (l, r) => LLVM.BuildFSub(builder, l, r, "add"));
+                res = res.Zip(cs[i], (l, r) => LLVM.BuildFSub(builder, l, r, "sub"));
             }
             return res;
         }

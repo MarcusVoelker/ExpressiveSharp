@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ExpressiveSharp.Expression;
 using NUnit.Framework;
 
@@ -38,6 +40,8 @@ namespace ExpressiveSharp.Parser
             Console.WriteLine(ast2.ToString());
             var ast3 = ASTBuilder.BuildAst(Tokenizer.Tokenize("f(a,b,c) = a+b*c; g(a) = f(f(a-1,a-2,a-3),f(a-4,a-5,a-6),f(a-7,a-8,a-9)); g(5)"));
             Console.WriteLine(ast3.ToString());
+            var ast4 = ASTBuilder.BuildAst(Tokenizer.Tokenize("x*5*4"));
+            Console.WriteLine(ast4.ToString());
         }
 
         [Test]
@@ -49,18 +53,6 @@ namespace ExpressiveSharp.Parser
                 {"y", new TensorType(3)}
             });
             Console.WriteLine(exp);
-        }
-
-        [Test]
-        public void JittingTest()
-        {
-            var exp = new Expression.Expression("x*4+(y-1)", new Dictionary<string, TensorType>
-            {
-                {"x", new TensorType()},
-                {"y", new TensorType()}
-            });
-            Console.WriteLine(exp);
-            exp.JITCompile();
         }
     }
 }

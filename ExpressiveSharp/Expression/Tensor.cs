@@ -15,14 +15,20 @@ namespace ExpressiveSharp.Expression
             Type = type;
             Data = new float[type.ElementCount()];
             for (var i = 0; i < Type.ElementCount(); ++i)
-                Data[i] = i >= data.Count ? 0 : data[i];
+                if (data.Count == 0)
+                    Data[i] = 0;
+                else
+                    Data[i] = data[i % data.Count];
         }
         public Tensor(TensorType type, params float[] data)
         {
             Type = type;
             Data = new float[type.ElementCount()];
             for (var i = 0; i < Type.ElementCount(); ++i)
-                Data[i] = i >= data.Length ? 0 : data[i];
+                if (data.Length == 0)
+                    Data[i] = 0;
+                else
+                    Data[i] = data[i%data.Length];
         }
 
         public static Tensor Scalar(float v)
@@ -116,5 +122,7 @@ namespace ExpressiveSharp.Expression
         {
             return new TensorType(Data.Select(f => (int) f));
         }
+
+        public float this[int i] => Data[i];
     }
 }

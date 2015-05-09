@@ -55,18 +55,19 @@ namespace ExpressiveSharp.Parser
         private static ASTNode BuildDot(IEnumerator<Token> tokens)
         {
             var lhs = BuildCore(tokens);
-            if (!tokens.Current.IsOperator(OperatorToken.OperatorType.Dot))
-                return lhs;
+            while (tokens.Current.IsOperator(OperatorToken.OperatorType.Dot))
+            {
+                var op = tokens.Current;
 
-            var op = tokens.Current;
+                tokens.MoveNext();
+                var rhs = BuildCore(tokens);
 
-            tokens.MoveNext();
-            var rhs = BuildCore(tokens);
-
-            var node = new ASTNode(op);
-            node.Children.Add(lhs);
-            node.Children.Add(rhs);
-            return node;
+                var node = new ASTNode(op);
+                node.Children.Add(lhs);
+                node.Children.Add(rhs);
+                lhs = node;
+            }
+            return lhs;
         }
 
         private static ASTNode BuildNeg(IEnumerator<Token> tokens)
@@ -85,38 +86,40 @@ namespace ExpressiveSharp.Parser
         private static ASTNode BuildMul(IEnumerator<Token> tokens)
         {
             var lhs = BuildNeg(tokens);
-            if (!tokens.Current.IsOperator(OperatorToken.OperatorType.Star) &&
-                !tokens.Current.IsOperator(OperatorToken.OperatorType.Slash) &&
-                !tokens.Current.IsOperator(OperatorToken.OperatorType.Percent))
-                return lhs;
+            while (tokens.Current.IsOperator(OperatorToken.OperatorType.Star) ||
+                   tokens.Current.IsOperator(OperatorToken.OperatorType.Slash) ||
+                   tokens.Current.IsOperator(OperatorToken.OperatorType.Percent))
+            {
+                var op = tokens.Current;
 
-            var op = tokens.Current;
+                tokens.MoveNext();
+                var rhs = BuildNeg(tokens);
 
-            tokens.MoveNext();
-            var rhs = BuildMul(tokens);
-
-            var node = new ASTNode(op);
-            node.Children.Add(lhs);
-            node.Children.Add(rhs);
-            return node;
+                var node = new ASTNode(op);
+                node.Children.Add(lhs);
+                node.Children.Add(rhs);
+                lhs = node;
+            }
+            return lhs;
         }
 
         private static ASTNode BuildAdd(IEnumerator<Token> tokens)
         {
             var lhs = BuildMul(tokens);
-            if (!tokens.Current.IsOperator(OperatorToken.OperatorType.Plus) &&
-                !tokens.Current.IsOperator(OperatorToken.OperatorType.Minus))
-                return lhs;
+            while (tokens.Current.IsOperator(OperatorToken.OperatorType.Plus) ||
+                   tokens.Current.IsOperator(OperatorToken.OperatorType.Minus))
+            {
+                var op = tokens.Current;
 
-            var op = tokens.Current;
+                tokens.MoveNext();
+                var rhs = BuildMul(tokens);
 
-            tokens.MoveNext();
-            var rhs = BuildAdd(tokens);
-
-            var node = new ASTNode(op);
-            node.Children.Add(lhs);
-            node.Children.Add(rhs);
-            return node;
+                var node = new ASTNode(op);
+                node.Children.Add(lhs);
+                node.Children.Add(rhs);
+                lhs = node;
+            }
+            return lhs;
         }
 
         private static ASTNode BuildLine(IEnumerator<Token> tokens)

@@ -74,17 +74,26 @@ namespace ExpressiveSharp.Expression.Nodes
             var vars = GetVariables().ToList();
             vars.Sort();
             var module = LLVM.ModuleCreateWithName("JIT");
-            var args = new LLVMTypeRef[1];
-            var func = LLVM.AddFunction(module, "Test", LLVM.FunctionType(LLVM.DoubleType(), out args[0], (uint) vars.Count(), new LLVMBool(0)));
-
+            var args = vars.Select(x => LLVM.FloatType());
+            var func = LLVM.AddFunction(module, "Test", LLVM.FunctionType(LLVM.FloatType(), out args.ToArray()[0], (uint) vars.Count(), new LLVMBool(0)));
+            
             var varDict = new Dictionary<string, LLVMValueRef>();
+            var ctr = 0;
             foreach (var v in vars)
             {
                 for (var i = 0; i < v.Item2.ElementCount(); ++i)
-                    varDict[v.Item1 + "#" + i] = LLVM.GetParam(func, (uint)i);
+                {
+                    varDict[v.Item1 + "#" + i] = LLVM.GetParam(func, (uint) ctr);
+                    ctr++;
+                }
             }
 
-            return BuildLLVM(LLVM.CreateBuilder(),varDict);
+            var bb = LLVM.AppendBasicBlock(func, "BB");
+            var builder = LLVM.CreateBuilder();
+            LLVM.PositionBuilderAtEnd(builder, bb);
+            var ret = BuildLLVM(builder,varDict);
+            LLVM.BuildRet(builder,ret.First());
+            yield return func;
         }
 
         public abstract IEnumerable<Tuple<string, TensorType>> GetVariables();
