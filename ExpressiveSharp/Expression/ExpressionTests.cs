@@ -38,8 +38,8 @@ namespace ExpressiveSharp.Expression
                 {"y", new TensorType()}
             });
             var f = exp.RawJITCompile();
-            float[] ins = new float[4];
-            float[] outs = new float[3];
+            var ins = new float[4];
+            var outs = new float[3];
             ins[0] = 1;
             ins[1] = 2;
             ins[2] = 3;

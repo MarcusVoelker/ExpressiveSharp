@@ -30,7 +30,13 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
 
         protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
         {
-            throw new NotImplementedException("Mod not implemented");
+            var cs = children.ToList();
+            var res = cs[0];
+            for (var i = 1; i < cs.Count; ++i)
+            {
+                res = res.Zip(cs[i], (l, r) =>LLVM.BuildFRem(builder, l, r, "mod"));
+            }
+            return res;
         }
     }
 }
