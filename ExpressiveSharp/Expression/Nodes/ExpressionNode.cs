@@ -71,7 +71,7 @@ namespace ExpressiveSharp.Expression.Nodes
 
         public abstract IEnumerable<LLVMValueRef> BuildLLVM(LLVMBuilderRef builder, Dictionary<string, LLVMValueRef> vars);
 
-        public Expression.RawExpressionFunction BuildLLVM()
+        public Expression.RawExpressionFunction BuildLLVM(out LLVMExecutionEngineRef executionEngine)
         {
             var vars = GetVariables().ToList();
             vars.Sort();
@@ -105,8 +105,6 @@ namespace ExpressiveSharp.Expression.Nodes
             }
             LLVM.BuildRetVoid(builder);
 
-            LLVMExecutionEngineRef engine;
-
             LLVM.LinkInMCJIT();
             LLVM.InitializeX86Target();
             LLVM.InitializeX86TargetInfo();
@@ -125,10 +123,10 @@ namespace ExpressiveSharp.Expression.Nodes
             IntPtr error;
 
             LLVM.InitializeMCJITCompilerOptions(out options, optionsSize);
-            LLVM.CreateMCJITCompilerForModule(out engine, module, out options, optionsSize, out error);
+            LLVM.CreateMCJITCompilerForModule(out executionEngine, module, out options, optionsSize, out error);
 
             var passManager = LLVM.CreateFunctionPassManagerForModule(module);
-            LLVM.AddTargetData(LLVM.GetExecutionEngineTargetData(engine), passManager);
+            LLVM.AddTargetData(LLVM.GetExecutionEngineTargetData(executionEngine), passManager);
             LLVM.AddBasicAliasAnalysisPass(passManager);
             LLVM.AddPromoteMemoryToRegisterPass(passManager);
             LLVM.AddInstructionCombiningPass(passManager);
@@ -138,7 +136,9 @@ namespace ExpressiveSharp.Expression.Nodes
             LLVM.InitializeFunctionPassManager(passManager);
             LLVM.RunFunctionPassManager(passManager, func);
 
-            return (Expression.RawExpressionFunction) Marshal.GetDelegateForFunctionPointer(LLVM.GetPointerToGlobal(engine, func), typeof(Expression.RawExpressionFunction));
+            LLVM.DisposePassManager(passManager);
+
+            return (Expression.RawExpressionFunction) Marshal.GetDelegateForFunctionPointer(LLVM.GetPointerToGlobal(executionEngine, func), typeof(Expression.RawExpressionFunction));
         }
 
         public abstract IEnumerable<Tuple<string, TensorType>> GetVariables();

@@ -9,9 +9,11 @@ using LLVMSharp;
 
 namespace ExpressiveSharp.Expression
 {
-    public class Expression
+    public class Expression : IDisposable
     {
         private ExpressionNode rootNode;
+        
+        private LLVMExecutionEngineRef executionEngine;
 
         public delegate Tensor ExpressionFunction(Tensor[] args);
         public delegate void RawExpressionFunction(float[] args, float[] outs);
@@ -77,7 +79,8 @@ namespace ExpressiveSharp.Expression
 
         public ExpressionFunction JITCompile()
         {
-            var raw = rootNode.BuildLLVM();
+            Cleanup();
+            var raw = rootNode.BuildLLVM(out executionEngine);
             return args =>
             {
                 var size = args.Sum(t => t.Type.ElementCount());
@@ -94,12 +97,32 @@ namespace ExpressiveSharp.Expression
 
         public RawExpressionFunction RawJITCompile()
         {
-            return rootNode.BuildLLVM();
+            Cleanup();
+            return rootNode.BuildLLVM(out executionEngine);
         }
 
         public override string ToString()
         {
             return rootNode.ToString();
+        }
+
+        private void Cleanup()
+        {
+            if (executionEngine.Pointer == IntPtr.Zero)
+                return;
+            LLVM.DisposeExecutionEngine(executionEngine);
+            executionEngine.Pointer = IntPtr.Zero;
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+            GC.SuppressFinalize(this);
+        }
+
+        ~Expression()
+        {
+            Cleanup();
         }
     }
 }
