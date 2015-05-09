@@ -38,7 +38,7 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
             cTensors.RemoveAt(0);
             var cIndex = 0;
             var eIndex = 0;
-            for (var i = 0; i < OutputType.Count(); ++i)
+            for (var i = 0; i < OutputType.ElementCount(); ++i)
             {
                 result.Data[i] = cTensors[cIndex].Data[eIndex];
                 eIndex++;
@@ -52,7 +52,19 @@ namespace ExpressiveSharp.Expression.Nodes.Builtin
 
         protected override IEnumerable<LLVMValueRef> InternalBuildLLVM(LLVMBuilderRef builder, IEnumerable<IEnumerable<LLVMValueRef>> children)
         {
-            throw new NotImplementedException("Mod not implemented");
+            var cs = children.Select(c => c.ToList()).ToList();
+            cs.RemoveAt(0);
+            var cIndex = 0;
+            var eIndex = 0;
+            for (var i = 0; i < OutputType.ElementCount(); ++i)
+            {
+                yield return cs[cIndex][eIndex];
+                eIndex++;
+                if (eIndex < this.children[cIndex+1].OutputType.ElementCount())
+                    continue;
+                eIndex = 0;
+                cIndex = (cIndex + 1) % cs.Count;
+            }
         }
     }
 }
